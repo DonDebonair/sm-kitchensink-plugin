@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class MyPlugin(MachineBasePlugin):
+    """Example Plugin"""
+
     @process("reaction_added")
     def match_reaction(self, event):
         if not event['user'] == self.bot_info['id']:
@@ -27,43 +29,52 @@ class MyPlugin(MachineBasePlugin):
 
     @respond_to(r"^I love you")
     def love(self, msg):
+        """I love you: express your love to the bot, it might reciprocate"""
         msg.react("heart")
 
     @listen_to(r"^users")
     def list_users(self, msg):
+        """users: list all users in the Slack Workspace"""
         users = [u.name for u in self.users.values()]
         msg.say(f"{len(users)} Users: {users}")
 
     @listen_to(r"^wait$")
     def nag(self, msg):
+        """wait: the bot replies to you using a scheduled message"""
         msg.reply("wait for it", in_thread=True)
         dt = datetime.now() + timedelta(seconds=5)
         msg.reply_scheduled(dt, 'hello', in_thread=True)
 
     @listen_to(r"^reply$")
     def reply_me(self, msg: Message):
+        """reply: the bot replies to you"""
         msg.reply("sure, I'll reply to you", icon_url="https://placekitten.com/200/200")
 
     @listen_to(r"^reply ephemeral$")
     def reply_me_ephemeral(self, msg: Message):
+        """reply ephemeral: the bot replies to you and only you can see it"""
         msg.reply("sure, I'll reply to you in an ephemeral message", ephemeral=True)
 
     @listen_to(r"^reply in thread$")
     def reply_me_in_thread(self, msg: Message):
+        """reply in thread: the bot replies to you in a thread"""
         msg.reply("sure, I'll reply to you in a thread", in_thread=True)
 
     @listen_to(r"^dm reply$")
     def dm(self, msg: Message):
+        """dm reply: the bot replies to you in a DM"""
         msg.reply_dm("sure I'll reply to you in a DM")
 
     @listen_to(r"^dm reply scheduled$")
     def dm_scheduled(self, msg: Message):
+        """dm reply scheduled: the bot replies to you at a later moment, in a DM"""
         msg.reply_dm("wait for it")
         dt = datetime.now() + timedelta(seconds=5)
         msg.reply_dm_scheduled(dt, "sure I'll reply to you in a DM after 5 seconds")
 
     @listen_to(r"^blocks$")
     def blocks(self, msg: Message):
+        """blocks: show some rich messaging magic"""
         bx = [
             blocks.SectionBlock(
                 text="*Markdown formatted* text with _italics_ if we want",
@@ -76,6 +87,7 @@ class MyPlugin(MachineBasePlugin):
 
     @listen_to(r"^blocks raw$")
     def blocks_raw(self, msg: Message):
+        """blocks raw: show some rich messaging magic. Uses raw dict for specifying blocks"""
         bx = [
             {
                 "type": "section",
