@@ -1,6 +1,6 @@
 import logging
 
-from machine.plugins.decorators import process, route, respond_to, listen_to
+from machine.plugins.decorators import process, route, respond_to, listen_to, require_any_role
 from machine.plugins.base import MachineBasePlugin, Message
 from datetime import datetime, timedelta
 
@@ -202,3 +202,8 @@ class MyPlugin(MachineBasePlugin):
             }
         ]
         msg.say("fallback", blocks=bx)
+
+    @listen_to(r"^admin")
+    @require_any_role(['admin'])
+    def admin(self, msg: Message):
+        msg.say("You're an admin!")

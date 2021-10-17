@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "sm-example-plugin"
+version = "0.1.0"
+description = ""
+authors = ["Daan Debie <daan@dv.email>"]
+license = "MIT"
+packages = [
+    { include = "example_plugin" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.6.1"
+slack-machine = "^0.23.2"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
