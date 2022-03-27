@@ -10,7 +10,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
-slack-machine = "^0.23.2"
+slack-machine = "^0.25.0"
 
 [tool.poetry.dev-dependencies]
 

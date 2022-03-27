@@ -4,7 +4,7 @@ from machine.plugins.decorators import process, route, respond_to, listen_to, re
 from machine.plugins.base import MachineBasePlugin, Message
 from datetime import datetime, timedelta
 
-from slack.web.classes import blocks, elements
+from slack_sdk.models import blocks
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,9 @@ class MyPlugin(MachineBasePlugin):
 
     @process("reaction_added")
     def match_reaction(self, event):
-        if not event['user'] == self.bot_info['id']:
+        logger.info(event)
+        logger.info(self.bot_info)
+        if not event['user'] == self.bot_info['user_id']:
             emoji = event['reaction']
             channel = event['item']['channel']
             ts = event['item']['ts']
@@ -79,8 +81,8 @@ class MyPlugin(MachineBasePlugin):
             blocks.SectionBlock(
                 text="*Markdown formatted* text with _italics_ if we want",
                 fields=["*Left*", "*Right*", "line 2 left", "line 2 right"],
-                accessory=elements.ImageElement(image_url="http://placekitten.com/700/500",
-                                                alt_text="cute kitten")
+                accessory=blocks.ImageElement(image_url="http://placekitten.com/700/500",
+                                              alt_text="cute kitten")
             )
         ]
         msg.say("fallback", blocks=bx)
