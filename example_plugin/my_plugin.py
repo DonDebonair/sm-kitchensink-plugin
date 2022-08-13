@@ -1,6 +1,6 @@
 import logging
 
-from machine.plugins.decorators import process, route, respond_to, listen_to, require_any_role
+from machine.plugins.decorators import process, route, respond_to, listen_to, require_any_role, on
 from machine.plugins.base import MachineBasePlugin, Message
 from datetime import datetime, timedelta
 
@@ -209,3 +209,12 @@ class MyPlugin(MachineBasePlugin):
     @require_any_role(['admin'])
     def admin(self, msg: Message):
         msg.say("You're an admin!")
+
+    @on("my-plugin-event")
+    def plugin_event_handle(self):
+        channel = self.find_channel_by_name('#general')
+        self.say(channel, "I'm listening to my-plugin-event")
+
+    @listen_to(r"^trigger my-plugin-event")
+    def trigger_plugin_event(self, msg: Message):
+        self.emit("my-plugin-event")
