@@ -1,4 +1,4 @@
-import logging
+from structlog.stdlib import get_logger
 from datetime import datetime, timedelta
 
 from machine.plugins.base import MachineBasePlugin, Message
@@ -12,7 +12,7 @@ from machine.plugins.decorators import (
 )
 from slack_sdk.models import blocks
 
-logger = logging.getLogger(__name__)
+main_logger = get_logger(__name__)
 
 
 class MyPlugin(MachineBasePlugin):
@@ -20,8 +20,8 @@ class MyPlugin(MachineBasePlugin):
 
     @process("reaction_added")
     async def match_reaction(self, event):
-        logger.info(event)
-        logger.info(self.bot_info)
+        main_logger.info(event)
+        main_logger.info("bot info", bot_info=self.bot_info)
         if not event["user"] == self.bot_info["user_id"]:
             emoji = event["reaction"]
             channel = event["item"]["channel"]
@@ -29,7 +29,8 @@ class MyPlugin(MachineBasePlugin):
             await self.react(channel, ts, emoji)
 
     @respond_to(r"^I love you", handle_message_changed=True)
-    async def love(self, msg: Message):
+    async def love(self, msg: Message, logger):
+        logger.info("Love")
         """I love you: express your love to the bot, it might reciprocate"""
         await msg.react("heart")
 
@@ -52,7 +53,7 @@ class MyPlugin(MachineBasePlugin):
         resp = await msg.reply(
             "sure, I'll reply to you", icon_url="https://placekitten.com/200/200"
         )
-        logger.info("TS: %s", resp["message"]["ts"])
+        main_logger.info("TS: %s", resp["message"]["ts"])
 
     @listen_to(r"^reply ephemeral$")
     async def reply_me_ephemeral(self, msg: Message):
@@ -208,7 +209,7 @@ class MyPlugin(MachineBasePlugin):
 
     @listen_to(r"^trigger my-plugin-event")
     async def trigger_plugin_event(self, msg: Message):
-        logger.info("Triggering my-plugin-event")
+        main_logger.info("Triggering my-plugin-event")
         self.emit("my-plugin-event", name="Daan")
 
     @schedule(minute="*/10")
