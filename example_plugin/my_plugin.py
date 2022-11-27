@@ -225,3 +225,7 @@ class MyPlugin(MachineBasePlugin):
             await self.unpin_message(msg.channel, pinned_item)
         await msg.pin_message()
         await self.storage.set("pinned-item", msg.ts)
+
+    @listen_to(r"info")
+    async def info(self, msg: Message):
+        await msg.say(f"Bot info: {self.bot_info}, base url: {self.web_client.base_url}")
