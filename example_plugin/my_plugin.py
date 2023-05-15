@@ -1,16 +1,21 @@
-from structlog.stdlib import get_logger
+from typing import Union
+
+from machine.plugins.command import Command
+from structlog.stdlib import get_logger, BoundLogger
 from datetime import datetime, timedelta
 
-from machine.plugins.base import MachineBasePlugin, Message
+from machine.plugins.base import MachineBasePlugin
+from machine.plugins.message import Message
 from machine.plugins.decorators import (
     process,
     respond_to,
     listen_to,
     on,
     require_any_role,
-    schedule,
+    schedule, command,
 )
-from slack_sdk.models import blocks
+from slack_sdk.models import blocks, JsonObject
+from slack_sdk.webhook import WebhookClient
 
 main_logger = get_logger(__name__)
 
@@ -228,4 +233,12 @@ class MyPlugin(MachineBasePlugin):
 
     @listen_to(r"info")
     async def info(self, msg: Message):
-        await msg.say(f"Bot info: {self.bot_info}, base url: {self.web_client.base_url}")
+        await msg.say(
+            f"Bot info: {self.bot_info}, base url: {self.web_client.base_url}"
+        )
+
+    @command("/hello")
+    async def command(self, command: Command, logger: BoundLogger):
+        logger.info("command triggered", command=command.command, text=command.text)
+        # yield "Hullo"
+        await command.say(text=f"Yoooo nice! You sent me: {command.text}")
