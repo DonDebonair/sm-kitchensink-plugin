@@ -1,27 +1,47 @@
-from typing import Union
-
-from machine.plugins.command import Command
-from structlog.stdlib import get_logger, BoundLogger
+import asyncio
 from datetime import datetime, timedelta
 
 from machine.plugins.base import MachineBasePlugin
-from machine.plugins.message import Message
+from machine.plugins.command import Command
 from machine.plugins.decorators import (
     process,
     respond_to,
     listen_to,
     on,
     require_any_role,
-    schedule, command,
+    schedule,
+    command,
 )
-from slack_sdk.models import blocks, JsonObject
-from slack_sdk.webhook import WebhookClient
+from machine.plugins.message import Message
+from slack_sdk.models import blocks
+from slack_sdk.models.views import View
+from structlog.stdlib import get_logger, BoundLogger
 
 main_logger = get_logger(__name__)
 
 
 class MyPlugin(MachineBasePlugin):
     """Example Plugin"""
+
+    async def init(self):
+        update_fns = []
+        for user in self.users.values():
+            home_blocks = [
+                blocks.HeaderBlock(
+                    text=blocks.PlainTextObject.from_str(
+                        f"Welcome {user.profile.display_name}"
+                    )
+                ),
+                blocks.DividerBlock(),
+                blocks.SectionBlock(
+                    text=blocks.MarkdownTextObject.from_str(
+                        "There is *so much* you can do here!"
+                    )
+                ),
+            ]
+            view = View(type="home", blocks=home_blocks)
+            update_fns.append(self.web_client.views_publish(user_id=user.id, view=view))
+        await asyncio.gather(*update_fns)
 
     @process("reaction_added")
     async def match_reaction(self, event):
@@ -240,5 +260,37 @@ class MyPlugin(MachineBasePlugin):
     @command("/hello")
     async def command(self, command: Command, logger: BoundLogger):
         logger.info("command triggered", command=command.command, text=command.text)
-        # yield "Hullo"
+        yield "Hullo"
         await command.say(text=f"Yoooo nice! You sent me: {command.text}")
+
+    @listen_to(r"^password")
+    async def password(self, msg: Message):
+        fields = blocks.SectionBlock(
+            text=f"Hey {msg.at_sender}, it looks like you might want to reset your password. Do you want me to do it?"
+        )
+
+        approve_button = blocks.ButtonElement(
+            text="Yes, please.",
+            action_id="password_reset_yes_for_user",
+            value=f"{msg.sender.id}",
+            style="primary",
+        )
+        deny_button = blocks.ButtonElement(
+            text="No, thank you.",
+            action_id="password_reset_no_for_user",
+            value=f"{msg.sender.id}",
+            style="danger",
+        )
+
+        buttons = [approve_button, deny_button]
+
+        actions = blocks.ActionsBlock(
+            block_id="password_reset_user_confirmation_block", elements=buttons
+        )
+
+        await msg.reply(
+            # providing text is strongly advised for i.e. mobile notifications
+            text=f"Hey {msg.at_sender}, it looks like you might want to reset your password. Do you want me to do it?",
+            in_thread=True,
+            blocks=[fields, actions],
+        )
