@@ -1,6 +1,6 @@
 # Slack Machine Kitchensink Plugin
 
-This is an example plugin for Slack Machine showcasing many of its capabilities.
+This is a plugin for Slack Machine showcasing many of its capabilities.
 
 ## Usage
 
@@ -24,14 +24,19 @@ When using `pip`, put the following in your _requirements.txt_:
 https://github.com/DandyDev/sm-kitchensink-plugin
 ```
 
-Add the plugin to the `PLUGINS` section of your `local_settings.py`. The fully qualified module path + class is:
-`sm_kitchensink_plugin.my_plugin.MyPlugin`
+Add the separate plugin classes to the `PLUGINS` section of your `local_settings.py`.
 
 ```python
-PLUGINS = ['machine.plugins.builtin.general.HelloPlugin',
-           'machine.plugins.builtin.help.HelpPlugin',
-           ...
-           'sm_kitchensink_plugin.my_plugin.MyPlugin']
+PLUGINS = [
+    'machine.plugins.builtin.general.HelloPlugin',
+    'machine.plugins.builtin.help.HelpPlugin',
+    ...
+    'sm_kitchensink_plugin.ListeningBasics',
+    'sm_kitchensink_plugin.ListeningAdvanced',
+    'sm_kitchensink_plugin.SlashCommands',
+    'sm_kitchensink_plugin.BlockKit',
+    'sm_kitchensink_plugin.Modals',
+]
 
 SLACK_APP_TOKEN = 'xapp-123'
 SLACK_BOT_TOKEN = 'xoxb-456'
