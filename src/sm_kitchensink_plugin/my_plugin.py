@@ -531,7 +531,8 @@ class MyPlugin(MachineBasePlugin):
                 }
             ]
         }
-        await self.open_modal(trigger_id=command.trigger_id, view=raw_modal)
+        resp = await command.open_modal(view=raw_modal)
+        logger.info("Modal opened", response=resp.data)
 
     @modal("my_modal")
     async def handle_modal(self, submission: ModalSubmission, logger: BoundLogger):
@@ -600,6 +601,7 @@ class MyPlugin(MachineBasePlugin):
     async def handle_modal_closed(self, closure: ModalClosure, logger: BoundLogger):
         logger.info("Modal closed", payload=closure.payload)
         await self.say(self.find_channel_by_name("#general"), "Sadly the modal was closed")
+        await closure.send_dm("You closed the modal. Are you sure you don't to submit your opinion?")
 
     @respond_to(r"^lunch")
     async def order_lunch(self, msg: Message):
